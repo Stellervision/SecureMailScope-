@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SecureMailScope E2E</title>
+  <style>
+    body {
+      width: 340px;
+      margin: 0;
+      padding: 16px;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      font-size: 13px;
+      color: #1f2937;
+    }
+
+    h1 {
+      margin: 0 0 4px;
+      font-size: 15px;
+    }
+
+    p {
+      margin: 0 0 12px;
+      color: #6b7280;
+      line-height: 1.45;
+    }
+
+    .identity {
+      padding: 10px;
+      margin-bottom: 8px;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+    }
+
+    .identity strong {
+      display: block;
+      word-break: break-all;
+    }
+
+    .identity small {
+      display: block;
+      color: #6b7280;
+      word-break: break-all;
+    }
+
+    .row {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    button,
+    label.button {
+      padding: 6px 10px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      background: #ffffff;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .remove {
+      margin-top: 6px;
+      color: #b42318;
+    }
+
+    #status {
+      margin-top: 10px;
+      color: #1e7a46;
+    }
+  </style>
+</head>
+<body>
+  <h1>SecureMailScope E2E</h1>
+  <p>
+    Encrypted SecureMailScope messages are decrypted locally inside Gmail
+    using the keys below. Keys never leave this device.
+  </p>
+
+  <div id="identities"></div>
+
+  <div class="row">
+    <label class="button">
+      Import identity backup
+      <input id="import" type="file" accept="application/json,.json" hidden>
+    </label>
+  </div>
+
+  <p style="margin-top: 12px">
+    Keys sync automatically when the SecureMailScope app
+    (localhost:5173) is open in this browser.
+  </p>
+
+  <div id="status"></div>
+
+  <script src="e2e-core.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

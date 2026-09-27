@@ -1,0 +1,29 @@
+# ---- Secrets: NEVER commit ------------------------------------------
+# OAuth client secret / API keys (copy backend/.env.example instead)
+.env
+*.env
+!.env.example
+
+# Local databases: saved mailboxes, OAuth access/refresh tokens,
+# registered E2E public keys. Created automatically on first run.
+backend/data/
+
+# Exported E2E identity backups contain PRIVATE keys
+securemailscope-identity-*.json
+
+# ---- Machine-specific / generated --------------------------------------
+backend/.venv/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+node_modules/
+frontend/dist/
+*.log
+
+# ---- OS / editor --------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/

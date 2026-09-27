@@ -1,0 +1,82 @@
+.sms-panel {
+  margin: 8px 0 12px;
+  padding: 14px 16px;
+  border: 1px solid #b7e1c7;
+  border-radius: 12px;
+  background: #f3fbf6;
+  font-family: "Google Sans", Roboto, Arial, sans-serif;
+  color: #1f2937;
+}
+
+.sms-panel-error {
+  border-color: #f2c4c4;
+  background: #fdf5f5;
+}
+
+.sms-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.sms-header.sms-ok {
+  color: #1e7a46;
+}
+
+.sms-header.sms-error {
+  color: #b42318;
+}
+
+.sms-subject {
+  margin-bottom: 8px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.sms-body {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.sms-attachments {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.sms-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.sms-attachment {
+  color: #1a73e8;
+  font-size: 13px;
+}
+
+.sms-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 12px;
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.sms-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #1a73e8;
+  font-size: 11px;
+  cursor: pointer;
+}

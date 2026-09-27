@@ -1,0 +1,763 @@
+PS:- 
+
+Background Electronic mail remains one of the most critical communication services for governments, enterprises, financial institutions, and academic organizations. Despite the widespread adoption of Transport Layer Security (TLS), many SMTP, IMAP, and POP3 deployments continue to suffer from cryptographic misconfigurations such as obsolete TLS versions, weak cipher suites, insecure STARTTLS implementations, expired or improperly configured certificates, and non-compliance with modern security standards. These weaknesses expose email infrastructures to downgrade attacks, man-in-the-middle attacks, passive interception, and other cryptographic threats.
+
+Although existing network analysis tools provide extensive packet-level visibility, they primarily focus on protocol decoding and traffic inspection. They do not automatically evaluate the overall cryptographic security posture of email communications or provide intelligent risk assessment and prioritization for security analysts.
+
+• Description Design and develop an AI-assisted passive network forensic framework capable of analyzing captured network traffic (PCAP files) containing SMTP, IMAP, and POP3 communications to automatically assess the cryptographic security posture of enterprise email infrastructures.
+
+The proposed solution shall reconstruct complete email communication sessions, identify encryption transitions, analyze TLS negotiations, validate digital certificates, detect cryptographic weaknesses, and leverage Artificial Intelligence/Machine Learning techniques to classify security risks, detect anomalous TLS behavior, and generate actionable security recommendations.
+
+The framework should assist Security Operations Centers (SOC), Digital Forensics teams, Incident Response teams, and enterprise administrators in rapidly identifying cryptographic vulnerabilities, prioritizing remediation efforts, and ensuring compliance with modern cryptographic best practices.
+
+• Objectives- The proposed system should be capable of:
+• Passive analysis of encrypted SMTP, IMAP, and POP3 traffic from PCAP files.
+• Automatic identification of application-layer email protocols.
+• Detection of STARTTLS negotiation and encrypted session upgrades.
+• Reconstruction of complete TCP communication streams.
+• Parsing and reconstruction of TLS handshakes.
+• Extraction and validation of X.509 digital certificates.
+• Identification of negotiated TLS versions, cipher suites, and key exchange mechanisms.
+• Detection of deprecated protocols, weak cipher suites, insecure cryptographic algorithms, and certificate-related vulnerabilities.
+• Extraction of cryptographic features for intelligent analysis.
+• Application of AI/ML techniques for:
+• Cryptographic risk classification.
+• Detection of anomalous TLS behavior.
+• Security posture scoring.
+• Threat prioritization.
+• Recommendation of mitigation measures.
+• Generation of comprehensive forensic reports and security dashboards.
+
+Expected Solution/Deliverables:
+
+The solution should provide the following outputs:
+
+• Automatic identification of SMTP, IMAP, and POP3 protocols.
+• STARTTLS negotiation detection and validation.
+• Complete TCP stream reconstruction.
+• TLS handshake reconstruction.
+• Detection of negotiated TLS versions.
+• Identification of negotiated cipher suites.
+• Identification of key exchange mechanisms.
+• Extraction of X.509 certificates.
+• Certificate chain validation.
+• Certificate expiration analysis.
+• Public key algorithm and key length analysis.
+• Digital signature algorithm identification.
+• Detection of weak cryptographic algorithms and deprecated TLS versions.
+• Identification of insecure protocol configurations.
+• Forward Secrecy assessment.
+• AI-based cryptographic risk scoring.
+• AI-assisted anomaly detection for suspicious TLS sessions.
+• Prioritized security findings.
+• Comprehensive cryptographic security posture assessment.
+• Exportable forensic reports in JSON, PDF, and HTML formats.
+• Interactive visualization dashboard for security monitoring and analysis.
+
+Presentation Slide:- 
+
+SLIDE 1 — TITLE
+
+SECUREMAILSCOPE
+
+AI-Assisted Cryptographic Security Posture Assessment for Secure Email Communications
+Problem Statement ID: SIH 26159
+Problem Statement: AI-Assisted Cryptographic Security Posture Assessment for Secure Email Communications
+Theme: Blockchain & Cybersecurity
+PS Category: Software
+Team ID: [TEAM ID]
+Team Name: [TEAM NAME]
+
+SLIDE 2 — PROPOSED SOLUTION
+PROPOSED SOLUTION
+Privacy-preserving security assessment platform for analyzing email transport and cryptographic posture.
+Accepts .eml files and authorized mail domains as analysis inputs.
+Reconstructs observed email transit hops from Received headers and correlates them with live DNS/SMTP/TLS evidence.
+Analyzes TLS versions, cipher suites, certificates, STARTTLS, MX and MTA-STS/DANE security posture where observable.
+Combines deterministic security rules with AI-assisted anomaly detection and risk prioritization.
+Produces security findings, HNDL exposure assessment, PQC readiness indicators and remediation guidance.
+PROBLEM RESOLUTION
+Automates fragmented manual inspection of email transport security.
+Identifies weak TLS configurations, certificate issues and mail-security policy gaps.
+Provides hop-level visibility instead of assessing only a single mail server.
+Separates observed .eml evidence from live infrastructure evidence.
+Converts technical cryptographic findings into prioritized and actionable recommendations.
+UNIQUE VALUE PROPOSITIONS (UVP)
+Multi-Hop Visibility: Reconstructs and evaluates the observed email transit path.
+Privacy-Preserving: Focuses analysis on headers and cryptographic metadata rather than email content.
+Hybrid Assessment: Combines passive .eml analysis with controlled live DNS/SMTP/TLS assessment.
+Explainable AI: AI assists anomaly detection and prioritization; deterministic rules establish security facts.
+Future Readiness: Provides HNDL exposure and PQC migration-readiness indicators.
+Actionable Remediation: Generates practical configuration templates for identified issues.
+
+
+SLIDE 3 — TECHNICAL APPROACH
+INPUT
+
+.EML File / Authorized Domain
+↓
+Email Headers + MX Records + DNS Policies + SMTP/TLS Metadata
+
+1. CORE TECHNOLOGY
+Python + FastAPI: Backend orchestration, parsing, security analysis and APIs.
+Next.js + React: Responsive security dashboard and visualization.
+Python Security Libraries: Email parsing, DNS resolution, TLS and certificate inspection.
+Scikit-learn: Lightweight anomaly detection and risk-prioritization layer.
+2. SECURITY ANALYSIS
+Email Header Analysis: Extracts and reconstructs observed Received hops.
+DNS Analysis: MX, MTA-STS and DANE/TLSA-related security checks.
+SMTP/TLS Probing: Controlled STARTTLS and TLS handshake assessment for authorized domains.
+Certificate Analysis: Validity, expiration, chain and public-key characteristics.
+Security Rule Engine: Deterministic detection of cryptographic and policy weaknesses.
+3. TECHNOLOGY FLOW
+.EML / DOMAIN
+      ↓
+Privacy-Aware Input Processing
+      ↓
+Header & Domain Extraction
+      ↓
+Observed Hop Reconstruction
+      ↓
+DNS / MX / MTA-STS Analysis
+      ↓
+Controlled SMTP / TLS Assessment
+      ↓
+Cryptographic Feature Extraction
+      ↓
+Security Rule Engine
+      ↓
+AI Anomaly Detection
+      ↓
+Risk + HNDL + PQC Assessment
+      ↓
+Remediation
+      ↓
+Dashboard + Security Report
+
+
+SLIDE 4 — SECURITY & AI ANALYSIS
+CRYPTOGRAPHIC SECURITY ASSESSMENT
+
+The system evaluates available evidence for:
+
+TLS protocol version
+Cipher-suite characteristics
+Key-exchange mechanism
+Forward-secrecy properties
+Certificate validity and expiration
+Certificate/public-key parameters
+STARTTLS availability and behavior
+MX configuration
+MTA-STS policy
+DANE/TLSA and DNSSEC indicators where available
+AI-ASSISTED ANALYSIS
+
+Deterministic rules establish security facts; AI assists with anomaly detection and prioritization.
+
+Input Features:
+
+TLS and key-exchange characteristics
+Certificate properties
+Security-policy state
+Hop-level configuration
+Deviation from observed baseline
+
+Output:
+
+Normal / Anomalous
+        ↓
+Risk Indicators
+        ↓
+Prioritized Investigation
+HNDL EXPOSURE
+
+Estimates potential long-term exposure from recorded encrypted traffic based on:
+
+Cryptographic/key-establishment characteristics
+Importance of the affected mail hop
+Relevance and exposure of encrypted traffic
+
+HNDL = Exposure Indicator, not a prediction of future decryption.
+
+PQC READINESS
+Current Classical Cryptography
+             ↓
+       Migration Gap
+             ↓
+       PQC Readiness
+
+Reference point: NIST FIPS 203 — ML-KEM
+
+
+SLIDE 5 — FEASIBILITY AND VIABILITY
+TECHNICAL FEASIBILITY
+Built primarily with mature, open-source Python security and networking technologies.
+Modular architecture separates email parsing, DNS analysis, TLS inspection, security rules, AI and reporting.
+Supports both passive email evidence and controlled live assessment.
+Can operate locally during analysis to minimize exposure of sensitive email information.
+Designed for deployment as a lightweight web application.
+COST FEASIBILITY
+Software-only prototype with no specialized hardware requirements.
+Uses widely available open-source frameworks and security libraries.
+Suitable for standard cloud or developer environments.
+Scalable architecture allows additional security checks to be added later.
+POTENTIAL CHALLENGES & STRATEGIES
+Incomplete/Forged Received Headers → Treat headers as observed evidence and correlate with live evidence.
+Limited Historical TLS Visibility → Clearly distinguish unavailable historical handshake data from live probe results.
+Different Security Postures Across Hops → Perform independent hop-level assessment.
+DNS/DANE Validation Complexity → Use standards-based DNS/TLSA validation.
+Limited AI Training Data → Use lightweight anomaly detection with controlled test scenarios.
+False Positives → Combine AI indicators with deterministic security evidence before prioritization.
+
+
+SLIDE 6 — IMPACT AND BENEFITS
+POTENTIAL IMPACT ON TARGET AUDIENCE
+Helps SOC teams, email administrators and cybersecurity analysts assess email transport security faster.
+Provides visibility into cryptographic weaknesses across multiple mail-transit hops.
+Helps prioritize insecure TLS and mail-security configurations.
+Converts complex DNS, TLS and certificate evidence into understandable security intelligence.
+Supports proactive preparation for long-term cryptographic migration.
+BENEFITS
+
+SECURITY
+
+Detects weak TLS configurations, certificate issues and transport-policy gaps.
+
+PRIVACY
+
+Enables local-first analysis focused on headers and cryptographic metadata.
+
+OPERATIONAL
+
+Reduces manual inspection and consolidates multiple security checks.
+
+FUTURE READINESS
+
+HNDL exposure assessment and PQC migration-readiness indicators.
+
+REMEDIATION
+
+Provides actionable recommendations and configuration templates.
+KEY OUTPUT
+EMAIL / DOMAIN
+      ↓
+OBSERVED + LIVE EVIDENCE
+      ↓
+MULTI-HOP SECURITY VIEW
+      ↓
+CRYPTOGRAPHIC FINDINGS
+      ↓
+RISK / HNDL / PQC ASSESSMENT
+      ↓
+REMEDIATION
+      ↓
+SECURITY REPORT
+
+
+SLIDE 7 — RESEARCH AND REFERENCES
+STANDARDS & SECURITY REFERENCES
+RFC 3207 — SMTP Service Extension for Secure SMTP over TLS
+RFC 8446 — The Transport Layer Security (TLS) Protocol Version 1.3
+RFC 8461 — SMTP MTA Strict Transport Security (MTA-STS)
+RFC 7672 — SMTP Security via Opportunistic DNS-Based Authentication of Named Entities (DANE) TLS
+RFC 5280 — Internet X.509 Public Key Infrastructure Certificate and CRL Profile
+RFC 8314 — Cleartext Considered Obsolete: Use of TLS for Email Submission and Access
+NIST FIPS 203 — Module-Lattice-Based Key-Encapsulation Mechanism Standard (ML-KEM)
+NIST SP 800-52 — Guidelines for the Selection, Configuration, and Use of TLS Implementations
+TECHNOLOGY REFERENCES
+Python / FastAPI Documentation
+Next.js / React Documentation
+OpenSSL Documentation
+dnspython Documentation
+Scikit-learn Documentation
+Wireshark / TShark Documentation
+CORE CONCEPT
+OBSERVE
+   ↓
+RECONSTRUCT
+   ↓
+ANALYZE
+   ↓
+DETECT
+   ↓
+PRIORITIZE
+   ↓
+REMEDIATE
+
+Architecture:-
+
+SecureMailScope — Current Vision
+
+SecureMailScope is a privacy-preserving email security intelligence platform that protects and assesses email communications across their lifecycle.
+
+The core idea is:
+
+Detect → Assess → Explain → Recommend → Protect → Verify
+
+It combines:
+
+Email cryptographic security
+E2E encryption
+Email authentication analysis
+SMTP/TLS security analysis
+Recipient/provider security assessment
+AI-assisted risk interpretation
+Explainable security recommendations
+Local/private decryption
+Post-send verification
+
+The important architectural principle is:
+
+The backend should never need the recipient's private key or plaintext E2E message.
+
+2. Current Project State
+✅ Backend foundation
+
+Already working:
+
+FastAPI backend
+Mailbox architecture
+Gmail integration
+OAuth/provider abstraction
+SMTP sending
+Gmail App Password test
+Actual email sending verified
+Gmail mailbox retrieval
+Message retrieval
+EML parsing
+Received-hop reconstruction
+Authentication analysis
+SMTP/TLS probing
+DNS/MX security analysis
+Risk scoring
+HNDL assessment
+Security findings
+Combined security summaries
+
+3. E2E Encryption — Current State
+
+This part is actually one of the strongest pieces now.
+
+Current protocol:
+
+Plaintext
+   │
+   ▼
+AES-256-GCM
+   │
+   ├── ciphertext
+   └── AES key
+          │
+          ▼
+     RSA-OAEP-256
+          │
+          ▼
+    wrapped AES key
+The email contains a SecureMailScope envelope such as:
+
+SecureMailScope-E2E
+version: 1
+content_encryption: AES-256-GCM
+key_encryption: RSA-OAEP-256
+recipient_key_id
+recipient_key_fingerprint
+nonce
+wrapped_key
+ciphertext
+
+And we have actually tested the path through Gmail.
+
+The receiver successfully got the encrypted envelope and SecureMailScope decrypted it locally.
+
+So:
+
+Crypto path = working.
+
+4. The Current Problem
+
+The current receiver experience is:
+
+Gmail
+ ↓
+Encrypted envelope
+ ↓
+SecureMailScope application
+ ↓
+Browser local decryption
+ ↓
+Hello
+
+But the desired experience is:
+
+Gmail
+ ↓
+Encrypted envelope
+ ↓
+SecureMailScope browser extension
+ ↓
+Local decryption
+ ↓
+Hello
+
+So the next major engineering task is receiver-side Gmail integration.
+
+That is why we were planning the browser extension.
+
+5. Now — The AI Implementation
+
+This is where we should be careful.
+
+We already have security intelligence.
+
+But we should not pretend the existing deterministic security rules are AI.
+
+For example:
+
+STARTTLS absent
+        ↓
+High finding
+
+That is a security rule.
+
+Likewise:
+
+DKIM = pass
+SPF = pass
+DMARC = pass
+        ↓
+authentication finding
+
+That is evidence-based analysis.
+
+These are excellent foundations for AI, but they aren't themselves AI.
+
+6. What AI Should Actually Do
+
+I would implement AI as an explainable security reasoning layer, rather than allowing an LLM to randomly decide whether an email is secure.
+
+The architecture should be:
+
+Raw Evidence
+     │
+     ▼
+Security Analysis
+     │
+     ├── TLS
+     ├── SMTP
+     ├── SPF
+     ├── DKIM
+     ├── DMARC
+     ├── MX
+     ├── TLSA
+     ├── MTA-STS
+     ├── E2E
+     └── HNDL
+          │
+          ▼
+   Structured Findings
+          │
+          ▼
+       AI Layer
+          │
+     ┌────┼─────────────┐
+     │    │             │
+     ▼    ▼             ▼
+ Explain Recommend   Prioritize
+     │    │             │
+     └────┼─────────────┘
+          ▼
+    Human-readable
+    Security Review
+
+This is much safer than:
+
+Email → LLM → "secure"
+7. AI's Responsibilities
+A. Explain security findings
+
+Instead of:
+
+STARTTLS missing.
+
+AI can produce:
+
+The receiving mail server was reachable, but the SMTP endpoint did not advertise STARTTLS. This means the available evidence does not demonstrate encrypted SMTP transport for this hop.
+
+That is useful.
+
+B. Correlate multiple findings
+
+Suppose:
+
+SPF       PASS
+DKIM      PASS
+DMARC     PASS
+STARTTLS  PASS
+TLS       PASS
+E2E       NO
+
+AI can explain:
+
+The message has strong sender authentication and observed encrypted transport, but these controls do not provide end-to-end confidentiality. The message contents may still be accessible to mail infrastructure.
+
+That's exactly the distinction your product needs.
+
+C. Explain E2E protection
+
+If E2E is present:
+
+E2E = TRUE
+AES-256-GCM
+RSA-OAEP-256
+recipient key verified
+
+AI can explain:
+
+The message content is encrypted before transmission and can only be decrypted by the recipient possessing the corresponding private key. Transport security and E2E security provide different protection layers.
+
+D. Generate recommendations
+
+For example:
+
+Finding:
+STARTTLS unavailable
+
+AI recommendation:
+Consider configuring STARTTLS on the receiving SMTP service
+and enforcing appropriate transport-security policies.
+E. Prioritize what matters
+
+An email could have 15 findings.
+
+AI can organize them into:
+
+Critical concerns
+Important concerns
+Informational observations
+Unknown / unverifiable properties
+
+But the underlying severity should continue coming from our security engine, not arbitrary LLM judgment.
+
+8. Where Machine Learning Fits
+
+We already have:
+
+scikit-learn
+
+installed.
+
+But I don't want us to force a meaningless ML model into the project just to say "AI."
+
+A better future ML component would learn from structured security features:
+
+Features
+──────────────
+TLS
+STARTTLS
+SPF
+DKIM
+DMARC
+TLSA
+MTA-STS
+E2E
+certificate properties
+hop count
+authentication anomalies
+provider characteristics
+
+and produce something like:
+
+security posture probability
+anomaly score
+risk pattern
+
+However, for the hackathon demo, we don't have a sufficiently large validated dataset to honestly claim a production-grade trained model.
+
+So the immediate AI architecture should be:
+
+Evidence engine + deterministic risk model + AI explanation/recommendation layer
+
+rather than pretending a tiny dataset gives us reliable cybersecurity ML.
+
+             ┌─────────────────────┐
+             │   Email Evidence    │
+             └──────────┬──────────┘
+                        ▼
+             ┌─────────────────────┐
+             │ Security Analyzer   │
+             └──────────┬──────────┘
+                        ▼
+             ┌─────────────────────┐
+             │ Structured Findings │
+             └──────────┬──────────┘
+                        ▼
+             ┌─────────────────────┐
+             │ Deterministic Risk  │
+             │       Engine        │
+             └──────────┬──────────┘
+                        ▼
+             ┌─────────────────────┐
+             │ AI Security         │
+             │ Reasoning Layer     │
+             ├─────────────────────┤
+             │ Explain             │
+             │ Correlate           │
+             │ Recommend           │
+             │ Summarize           │
+             └──────────┬──────────┘
+                        ▼
+             ┌─────────────────────┐
+             │ Security Review     │
+             └─────────────────────┘
+10. Remaining Work
+
+I'd divide the remaining work into this order:
+
+🔴 1. Receiver-side Gmail integration
+
+The most important unfinished part.
+
+Gmail
+ ↓
+Browser extension
+ ↓
+Detect SecureMailScope envelope
+ ↓
+Local private key
+ ↓
+Decrypt
+ ↓
+Render original email
+
+This completes the actual E2E user experience.
+
+🔴 2. AI security intelligence layer
+
+Build:
+
+Finding → explanation
+Finding combinations → contextual interpretation
+Risk → human-readable reasoning
+Finding → recommendation
+🟠 3. Compose-time security review
+
+Before sending:
+
+Compose
+   ↓
+Enter recipient
+   ↓
+Check recipient/domain
+   ↓
+Assess security posture
+   ↓
+Explain risks
+   ↓
+Recommend E2E if appropriate
+   ↓
+User confirms
+   ↓
+Encrypt
+   ↓
+Send
+🟠 4. Post-send verification
+
+After sending:
+
+Submission successful
+        ≠
+Recipient received
+        ≠
+Transport verified
+        ≠
+E2E decrypted
+
+SecureMailScope should explicitly distinguish these states.
+
+🟡 5. Polish/demo layer
+
+Then:
+
+Security dashboard
+E2E status indicators
+AI explanation cards
+Recommendations
+Evidence details
+Risk visualization
+Verification timeline
+Responsive UI
+Demo scenarios
+11. Final Demo Story
+
+The ideal hackathon demonstration should be extremely simple:
+
+Step 1 — Sender
+
+Type:
+
+Hello
+
+Select recipient.
+
+SecureMailScope says:
+
+Recipient supports SecureMailScope E2E encryption.
+
+User chooses:
+
+Encrypt & Send
+
+Step 2 — Network
+
+What actually travels:
+
+AES-256-GCM ciphertext
++
+RSA-OAEP-256 wrapped key
+
+Not:
+
+Hello
+Step 3 — Gmail
+
+Gmail receives/transports the encrypted envelope.
+
+Step 4 — Receiver
+
+Receiver opens Gmail.
+
+SecureMailScope extension detects:
+
+SecureMailScope-E2E
+
+and locally decrypts it.
+
+Receiver sees:
+
+Hello
+
+Step 5 — Security Intelligence
+
+SecureMailScope shows:
+
+E2E Encryption       ✓
+AES-256-GCM          ✓
+Recipient Key        ✓
+SMTP TLS             ✓
+DKIM                 ✓
+SPF                  ✓
+DMARC                ✓
+
+AI Security Summary
+
+"This message is protected by end-to-end encryption.
+Transport security provides an additional layer, while
+the message content remains encrypted independently of
+the mail transport."
+
+That gives us a much stronger complete story than simply demonstrating an EML analyzer.
+
+Current position in one sentence
+
+The cryptographic E2E path is working; the major unfinished pieces are making that decryption happen naturally inside the receiver's Gmail experience, adding the AI evidence-interpretation layer, and connecting everything into the final Compose → Assess → Encrypt → Send → Receive → Decrypt → Verify flow.
+

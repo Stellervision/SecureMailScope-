@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "SecureMailScope E2E for Gmail",
+  "version": "1.0.0",
+  "description": "Detects SecureMailScope end-to-end encrypted envelopes in Gmail and decrypts them locally with your private key.",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://mail.google.com/*",
+    "http://localhost:5173/*",
+    "http://127.0.0.1:5173/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "SecureMailScope E2E",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://mail.google.com/*"],
+      "js": ["e2e-core.js", "gmail.js"],
+      "css": ["gmail.css"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "http://localhost:5173/*",
+        "http://127.0.0.1:5173/*"
+      ],
+      "js": ["app-bridge.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
