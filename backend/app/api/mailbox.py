@@ -137,8 +137,9 @@ def create_account(
 
     Saving does NOT attach or connect it.
 
-    Gmail and Microsoft accounts are intentionally routed through
-    provider OAuth instead of ordinary mailbox-password storage.
+    Provider mailboxes (Gmail, Microsoft) may also be saved with a
+    provider App Password; OAuth remains available as the alternative
+    sign-in for those providers.
     """
 
     result = add_mailbox(

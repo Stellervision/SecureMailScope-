@@ -1,3 +1,5 @@
+import os
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -35,12 +37,28 @@ app = FastAPI(
 )
 
 
+_cors_origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+# Extra origins for hosted deployments, e.g.
+# SECUREMAILSCOPE_CORS_ORIGINS=https://securemailscope.netlify.app
+_cors_extra = os.environ.get(
+    "SECUREMAILSCOPE_CORS_ORIGINS",
+    "",
+)
+
+for origin in _cors_extra.split(","):
+    origin = origin.strip()
+
+    if origin:
+        _cors_origins.append(origin)
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
+    allow_origins=_cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -5,6 +5,7 @@ load_dotenv()
 import base64
 import hashlib
 import html
+import imaplib
 import json
 import os
 import re
@@ -988,18 +989,26 @@ def add_mailbox(
             smtp_host
         )
 
-    if provider in {
-        "Gmail",
-        "Microsoft",
-    }:
-        return {
-            "status": "invalid",
-            "message": (
-                f"{provider} accounts should be connected "
-                "through the provider OAuth flow instead of "
-                "saving an ordinary mailbox password."
-            ),
-        }
+    # Provider SMTP (smtp.gmail.com, smtp.office365.com, ...) is allowed
+    # with a provider App Password. Blocking it here made it impossible
+    # to add any Gmail mailbox unless OAuth client credentials were
+    # configured, which left the app unable to send at all. If the
+    # credential is an ordinary password instead of an App Password the
+    # SMTP authentication step fails with a specific error message.
+    if provider == "Gmail":
+        guidance = (
+            " Gmail requires an App Password: enable 2-Step "
+            "Verification, then create one under Google Account → "
+            "Security → App passwords."
+        )
+    elif provider == "Microsoft":
+        guidance = (
+            " Microsoft requires SMTP AUTH to be enabled for the "
+            "mailbox and an App Password where basic auth is "
+            "restricted."
+        )
+    else:
+        guidance = ""
 
     account_id = _account_id_for_connection(
         sender_email,
@@ -1078,7 +1087,7 @@ def add_mailbox(
         "message": (
             "Mailbox account saved successfully. "
             "Attach it when you are ready."
-        ),
+        ) + guidance,
     }
 
 
@@ -2568,14 +2577,30 @@ def send_connected_email(
         }
 
     except smtplib.SMTPAuthenticationError:
-        return {
-            "status": "authentication_error",
-            "message": (
+        if (
+            _normalize_provider(
+                account.get("provider")
+            )
+            == "Gmail"
+        ):
+            auth_message = (
+                "Gmail rejected the credential. Google no longer "
+                "accepts ordinary account passwords for SMTP. Enable "
+                "2-Step Verification, create an App Password (Google "
+                "Account → Security → App passwords), save it as this "
+                "mailbox's credential, and connect again."
+            )
+        else:
+            auth_message = (
                 "Mailbox authentication failed. "
                 "For Google or Microsoft accounts, reconnect "
                 "the OAuth authorization. For custom SMTP, "
                 "verify the configured credential."
-            ),
+            )
+
+        return {
+            "status": "authentication_error",
+            "message": auth_message,
         }
 
     except smtplib.SMTPException as exc:
@@ -3415,6 +3440,291 @@ def _gmail_get_message(
     )
 
 
+# ---------------------------------------------------------------------------
+# IMAP retrieval for saved-credential (App Password) mailboxes
+# ---------------------------------------------------------------------------
+
+
+def _imap_host_for_account(
+    account: dict[str, Any],
+) -> str:
+    smtp_host = _clean(
+        account.get("smtp_host")
+    ).lower()
+
+    if not smtp_host:
+        return ""
+
+    if (
+        "gmail" in smtp_host
+        or "googlemail" in smtp_host
+    ):
+        return "imap.gmail.com"
+
+    if (
+        "outlook" in smtp_host
+        or "office365" in smtp_host
+        or "hotmail" in smtp_host
+        or "live" in smtp_host
+    ):
+        return "outlook.office365.com"
+
+    if smtp_host.startswith(
+        "smtp."
+    ):
+        return "imap." + smtp_host[5:]
+
+    return ""
+
+
+def _imap_connection(
+    account: dict[str, Any],
+) -> imaplib.IMAP4_SSL:
+    host = _imap_host_for_account(
+        account
+    )
+
+    if not host:
+        raise RuntimeError(
+            "The IMAP server for this mailbox "
+            "could not be determined from its "
+            "SMTP host."
+        )
+
+    username = _clean(
+        account.get("username")
+        or account.get("sender_email")
+    )
+
+    password = _clean(
+        account.get("password")
+    )
+
+    if not username or not password:
+        raise RuntimeError(
+            "This mailbox has no saved IMAP "
+            "credentials."
+        )
+
+    try:
+        connection = imaplib.IMAP4_SSL(
+            host,
+            993,
+            timeout=15,
+        )
+
+        connection.login(
+            username,
+            password,
+        )
+
+    except imaplib.IMAP4.error as exc:
+        raise RuntimeError(
+            "The mail provider rejected the IMAP "
+            f"login for {username}. Confirm IMAP is "
+            "enabled for the account and that the "
+            "saved password is an App Password."
+        ) from exc
+
+    except OSError as exc:
+        raise RuntimeError(
+            "Unable to reach the mail provider "
+            f"IMAP server {host}."
+        ) from exc
+
+    return connection
+
+
+def _imap_fetch_raw(
+    connection: imaplib.IMAP4_SSL,
+    uid: str,
+) -> bytes:
+    status, data = connection.uid(
+        "FETCH",
+        uid,
+        "(RFC822)",
+    )
+
+    if status != "OK":
+        raise RuntimeError(
+            "The mail provider refused to return "
+            "the message."
+        )
+
+    for part in data:
+        if isinstance(
+            part,
+            tuple,
+        ):
+            return part[1]
+
+    raise RuntimeError(
+        "The mail provider returned an empty "
+        "message."
+    )
+
+
+def _imap_list_messages(
+    account: dict[str, Any],
+    limit: int,
+) -> list[dict[str, Any]]:
+    try:
+        limit = int(limit)
+
+    except (
+        TypeError,
+        ValueError,
+    ):
+        limit = 20
+
+    limit = max(
+        1,
+        min(limit, 50),
+    )
+
+    connection = _imap_connection(
+        account
+    )
+
+    try:
+        connection.select(
+            "INBOX",
+            readonly=True,
+        )
+
+        status, data = connection.uid(
+            "SEARCH",
+            None,
+            "ALL",
+        )
+
+        if status != "OK":
+            raise RuntimeError(
+                "The mail provider refused the "
+                "inbox search."
+            )
+
+        uids = [
+            uid.decode(
+                "ascii",
+                errors="ignore",
+            )
+            for uid in (data[0] or b"").split()
+        ]
+
+        items: list[dict[str, Any]] = []
+
+        for uid in reversed(
+            uids[-limit:]
+        ):
+            try:
+                raw_eml = _imap_fetch_raw(
+                    connection,
+                    uid,
+                )
+
+                message = _normalize_gmail_message(
+                    raw_eml,
+                    message_id=uid,
+                )
+
+            except Exception:
+                # One malformed message must not
+                # break the whole inbox.
+                continue
+
+            items.append(
+                {
+                    "id": message.get(
+                        "id",
+                        uid,
+                    ),
+                    "thread_id": message.get(
+                        "thread_id",
+                        "",
+                    ),
+                    "sender": message.get(
+                        "sender",
+                        "",
+                    ),
+                    "recipients": message.get(
+                        "recipients",
+                        [],
+                    ),
+                    "subject": message.get(
+                        "subject",
+                        "",
+                    ),
+                    "preview": message.get(
+                        "preview",
+                        "",
+                    ),
+                    "received_at": message.get(
+                        "received_at",
+                        "",
+                    ),
+                    "labels": [],
+                    "provider": message.get(
+                        "provider",
+                        "Gmail",
+                    ),
+                    "e2e": message.get(
+                        "e2e"
+                    ),
+                }
+            )
+
+        return items
+
+    finally:
+        try:
+            connection.logout()
+
+        except Exception:
+            pass
+
+
+def _imap_get_message(
+    account: dict[str, Any],
+    message_id: str,
+) -> dict[str, Any]:
+    message_id = _clean(
+        message_id
+    )
+
+    if not message_id:
+        raise ValueError(
+            "Message ID is required."
+        )
+
+    connection = _imap_connection(
+        account
+    )
+
+    try:
+        connection.select(
+            "INBOX",
+            readonly=True,
+        )
+
+        raw_eml = _imap_fetch_raw(
+            connection,
+            message_id,
+        )
+
+    finally:
+        try:
+            connection.logout()
+
+        except Exception:
+            pass
+
+    return _normalize_gmail_message(
+        raw_eml,
+        message_id=message_id,
+    )
+
+
 def list_mailbox_messages(
     account_id: str,
     limit: int = 20,
@@ -3442,7 +3752,15 @@ def list_mailbox_messages(
     )
 
     if provider == "Gmail":
-        return _gmail_list_messages(
+        if account.get("auth_type") == "oauth":
+            return _gmail_list_messages(
+                account,
+                limit,
+            )
+
+        # Saved-credential (App Password) mailboxes
+        # read their inbox over IMAP.
+        return _imap_list_messages(
             account,
             limit,
         )
@@ -3480,7 +3798,13 @@ def get_mailbox_message(
     )
 
     if provider == "Gmail":
-        return _gmail_get_message(
+        if account.get("auth_type") == "oauth":
+            return _gmail_get_message(
+                account,
+                message_id,
+            )
+
+        return _imap_get_message(
             account,
             message_id,
         )
