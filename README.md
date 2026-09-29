@@ -10,6 +10,15 @@ encrypts it end-to-end so that only the recipient can read it.
 
 Built for Smart India Hackathon 2026, Problem Statement 26159 (Blockchain & Cybersecurity).
 
+## Live prototype
+
+**Try it without installing anything: <https://celadon-parfait-2b9ce4.netlify.app>**
+
+The hosted instance runs exactly this code: the recipient security check, the public-key
+registry and inbox decryption all work in your browser. Outbound mail *sending* is disabled
+there by the free host's network policy (it blocks SMTP ports), so the complete send flow is
+demonstrated on a local run — see *Getting started* below.
+
 ## How it works
 
 ```mermaid
@@ -89,7 +98,8 @@ setup.bat
 start.bat
 ```
 
-Open **http://localhost:5173**.
+Open the app in your browser: the [live prototype](#live-prototype) needs no setup, or use
+your local copy at `http://localhost:5173`.
 
 ### macOS / Linux
 
@@ -109,7 +119,8 @@ npm install
 npm run dev -- --host localhost --port 5173 --strictPort
 ```
 
-The REST API is documented at **http://127.0.0.1:8000/docs** (Swagger UI).
+The REST API is self-documenting: with the backend running, open Swagger UI at
+`http://127.0.0.1:8000/docs`.
 
 ## Connecting a mailbox
 
@@ -149,8 +160,8 @@ key card*), verifies the fingerprint, then composes and sends as above.
 
 1. Open `chrome://extensions`, enable **Developer mode**, click **Load unpacked** and select
    the `extension/` folder of this repo.
-2. Open http://localhost:5173 once in the same browser — the extension copies your keys
-   locally.
+2. Open your local app (`http://localhost:5173`) once in the same browser — the extension
+   copies your keys locally.
 3. Open the encrypted mail in Gmail: a green **"Decrypted locally by SecureMailScope"** panel
    shows the message and attachments.
 

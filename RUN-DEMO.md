@@ -53,7 +53,7 @@ cd C:\Users\SHAYAN\OneDrive\Desktop\mailscope\SecureMailScope-\frontend
 npm run dev
 ```
 
-Open http://localhost:5173
+Open `http://localhost:5173`
 
 ### 3. Add and connect the SENDER mailbox (in the app)
 
@@ -81,7 +81,7 @@ key.
 
 ### 5. Receiver creates their encryption identity
 
-Still at http://localhost:5173, open the **End-to-end identity**
+Still at `http://localhost:5173`, open the **End-to-end identity**
 panel (workspace nav), enter the **receiver's** Gmail address, and
 create/register the identity. This:
 
@@ -209,6 +209,19 @@ Save — Render redeploys automatically (~3 min).
 
 ### Hosted-demo notes
 
+- The SIH evaluation instance: frontend
+  <https://celadon-parfait-2b9ce4.netlify.app> (the backend URL stays private — the API has
+  no authentication).
+- **Sending is impossible on Render's free tier by policy, not by our
+  code.** Since 2026-09-26 Render free services block outbound traffic
+  to SMTP ports 25, 465, and 587 (a
+  [Render changelog](https://render.com/changelog/free-web-services-will-no-longer-allow-outbound-traffic-to-smtp-ports)
+  change). The deployed app reports the honest
+  "Could not reach the mail server …" error instead of failing silently.
+  Demo accordingly: run the **send** step on the local instance
+  (`start.bat`), use the deployed site for everything judges can check
+  online — recipient security check, key registry/fingerprints, and
+  inbox reads (IMAP 993 is not an SMTP port and still works).
 - Free tier sleeps after inactivity: the first request after a pause
   takes ~50 s to wake. Tell judges to wait.
 - Every redeploy resets the SQLite databases — re-add mailboxes.
