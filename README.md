@@ -1,237 +1,214 @@
 # SecureMailScope
 
-**AI-Assisted Cryptographic Security Posture Assessment for Secure Email Communications**
-SIH Problem Statement **26159** · Theme: Blockchain & Cybersecurity
+**AI-assisted cryptographic security posture assessment for secure email communications.**
 
-SecureMailScope checks how securely an email will travel *before* you send it, then encrypts it
-end-to-end so that only the recipient can read it.
+SecureMailScope tells you how securely an email will travel *before* you send it — and then
+encrypts it end-to-end so that only the recipient can read it.
 
-It evaluates:
+> Transport security (TLS) protects the pipe. SecureMailScope grades the pipe **and** locks
+> the message.
 
-- MX, MTA-STS, DANE/TLSA and STARTTLS/TLS for the recipient's mail servers;
-- certificates, HNDL exposure and PQC readiness;
-- SPF, DKIM and DMARC for received mail.
+Built for Smart India Hackathon 2026, Problem Statement 26159 (Blockchain & Cybersecurity).
 
-Messages are encrypted **in your browser** with AES-256-GCM + RSA-OAEP-256. The recipient decrypts
-locally in the SecureMailScope dashboard, or directly inside Gmail with the included browser
-extension. The backend never sees private keys or plaintext.
+## How it works
 
+```mermaid
+flowchart LR
+    A["Compose"] --> B["Recipient<br/>security check"]
+    B --> C["Risk score +<br/>AI explanation"]
+    C --> D["Encrypt in the browser<br/>AES-256-GCM +<br/>RSA-OAEP-256"]
+    D --> E["Send via Gmail"]
+    E --> F["Open in SecureMailScope<br/>or the browser extension"]
+    F --> G["Decrypt locally<br/>private key never<br/>left the browser"]
 ```
-Sender:   Compose → Security check → AI / Risk → AES-256-GCM + RSA-OAEP-256 → Gmail
-Receiver: Gmail → SecureMailScope (dashboard or extension) → local private key → "Hello"
-```
 
----
+The envelope is created **in your browser**: the message is sealed with AES-256-GCM and the AES
+key is wrapped with the recipient's RSA-OAEP-256 public key. What travels through Gmail is a
+labelled ciphertext block — even the mail provider cannot read it. The recipient decrypts it in
+the SecureMailScope dashboard, or directly inside Gmail with the included browser extension.
 
-## For judges: what to look at (60 seconds)
+<p align="center">
+  <img src="docs/e2e-submission-confirmation.jpg" alt="SecureMailScope confirms an end-to-end encrypted submission: AES-256-GCM content encryption, RSA-OAEP-256 key encryption" width="480">
+</p>
 
-1. **Compose → Check recipient security** — live DNS/TLS posture of the recipient's mail
-   servers (MX, MTA-STS, STARTTLS, certificate, risk score, PQC readiness, AI explanation).
-2. **Confirm & Send** — the message is encrypted in the browser. Open the same mail in **plain
-   Gmail**: you see only the ciphertext block. Even Google cannot read the content.
-3. **INBOX in SecureMailScope (or the Chrome extension)** — the recipient's browser decrypts the
-   mail locally with the private key that never left that browser.
-4. **The E2E proof:** the same mailbox opened on a *second* machine (or another instance) shows
-   ciphertext — only the key holder's browser can decrypt. This is the property that
-   transport security (TLS alone) cannot give you.
-5. **FORENSICS** — upload any `.eml` (e.g. `samples/test_email.eml`) for hop reconstruction,
-   SPF/DKIM/DMARC authentication results, findings and risk scoring.
+### What the security check evaluates
 
-| Folder | What it is |
-|--------|------------|
-| `backend/` | FastAPI backend: DNS/SMTP/TLS analysis, EML forensics, risk/HNDL/PQC, AI explanation layer, sending (SMTP/Gmail API), inbox retrieval (IMAP/Gmail API), key registry |
-| `frontend/` | React + Vite dashboard (Compose, Security review, Inbox, E2E key management) |
+| Check | What it tells you |
+|---|---|
+| MX + STARTTLS / TLS | Whether the recipient's mail servers accept encrypted connections |
+| MTA-STS and DANE (TLSA) | Whether downgrade-to-plaintext attacks can be prevented |
+| Server certificate | Validity, chain and expiry of the recipient's TLS certificate |
+| SPF · DKIM · DMARC | Whether received mail is properly authenticated |
+| Risk score + recommendations | A prioritised verdict with a plain-language explanation |
+| PQC readiness · HNDL | Post-quantum readiness and hidden-data-leakage signals |
+
+## Features
+
+- **Recipient security posture** — live DNS/SMTP/TLS probing of the destination domain, with a
+  risk score, recommendations and an AI-written explanation before you hit send.
+- **End-to-end encryption** — AES-256-GCM content encryption and RSA-OAEP-256 key wrapping,
+  done entirely in the browser with the Web Crypto API.
+- **Local-first keys** — private keys are generated in your browser and never transmitted;
+  only public keys are registered with the backend.
+- **Gmail browser extension** — decrypt SecureMailScope messages directly inside Gmail.
+- **EML forensics** — upload any `.eml` file and get hop reconstruction, SPF/DKIM/DMARC
+  results, findings and risk scoring.
+- **Key management** — key backup, rotation, and shareable public-key cards verified by
+  fingerprint.
+- **AI explanation layer** — optionally backed by any OpenAI-compatible LLM; a deterministic
+  built-in engine works without any API key.
+
+## Repository layout
+
+| Path | What it is |
+|---|---|
+| `backend/` | FastAPI service: DNS/SMTP/TLS analysis, EML forensics, risk/PQC/HNDL engines, AI layer, sending (SMTP + Gmail API), inbox reading (IMAP + Gmail API), public-key registry |
+| `frontend/` | React + Vite dashboard (Compose, Security review, Inbox, E2E identity management) |
 | `extension/` | Chrome/Edge extension that decrypts SecureMailScope messages inside Gmail |
-| `samples/` | Sample `.eml` for the forensics API |
-| `CHANGES.md` | Detailed change log, architecture notes and extended test guide |
-| `RUN-DEMO.md` | Short operator script for a live demo |
+| `samples/` | Sample `.eml` files for the forensics API |
+| `docs/` | Images used in this README |
+| `context/` | Original problem statement and reference material |
+| `CHANGES.md` | Full change log, architecture notes and extended test guide |
+| `RUN-DEMO.md` | Operator runbook: live demo script and deployment steps |
 
----
+## Getting started
 
-## 1. Prerequisites (install once)
+**Prerequisites:** Python 3.11+, Node.js 20.19+ (22 LTS recommended), Git, and Chrome or Edge
+if you want the Gmail extension.
 
-| Software | Version | Notes |
-|----------|---------|-------|
-| **Python** | 3.11 or newer | Windows: tick **"Add python.exe to PATH"** during install |
-| **Node.js** | 22 LTS (or 20.19+) | https://nodejs.org |
-| **Git** | any | https://git-scm.com |
-| **Google Chrome** or Edge | recent | Needed for the Gmail extension |
+### Windows (one click)
 
-## 2. Run it locally (Windows, one click)
+```bat
+git clone https://github.com/Stellervision/SecureMailScope-.git
+cd SecureMailScope-
 
-1. Clone the repository:
-   ```bat
-   git clone https://github.com/Stellervision/SecureMailScope-.git
-   cd SecureMailScope-
-   ```
-2. Double-click **`setup.bat`** once. It creates `backend\.venv`, installs Python packages and
-   runs `npm install` in `frontend`.
-3. Double-click **`start.bat`**. Two windows open (backend on port 8000, frontend on port 5173).
-   **Keep both open.** Your browser opens **http://localhost:5173**.
+:: first run only — creates the Python venv and installs all dependencies
+setup.bat
 
-macOS / Linux:
+:: starts the backend (port 8000) and the frontend (port 5173)
+start.bat
+```
+
+Open **http://localhost:5173**.
+
+### macOS / Linux
 
 ```bash
 git clone https://github.com/Stellervision/SecureMailScope-.git
 cd SecureMailScope-
 
-# Backend
+# Terminal 1 — backend
 cd backend
-python3 -m venv .venv
-source .venv/bin/activate
+python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 
-# Frontend (second terminal)
+# Terminal 2 — frontend
 cd frontend
 npm install
 npm run dev -- --host localhost --port 5173 --strictPort
 ```
 
-## 3. Connect a Gmail account — choose ONE of the two ways
+The REST API is documented at **http://127.0.0.1:8000/docs** (Swagger UI).
 
-The page switcher is the small bar at the bottom: **INBOX · SENT · COMPOSE · SECURITY · FORENSICS**.
+## Connecting a mailbox
 
-### Option A — Gmail App Password (recommended: no Google Cloud setup, works anywhere)
+Connect at least one Gmail account to send and receive. Two options:
 
-1. In the Gmail account you want to use, enable **2-Step Verification**, then create an
-   **App password**: https://myaccount.google.com/apppasswords (16 letters, shown once).
-2. In the app: **COMPOSE → Mailbox → + Add mailbox → custom SMTP form**.
-   Fill in:
-   | Field | Value |
-   |-------|-------|
-   | Email / Username | the Gmail address |
-   | Password | the 16-letter **App password** (not the Gmail password) |
-   | SMTP host | `smtp.gmail.com` |
-   | SMTP port | `587` |
-   | Security mode | `starttls` |
-3. Save → **Attach** the account → **Use this account**.
+**Option A — Gmail App Password (recommended, no Google Cloud setup)**
 
-Connecting creates the **encryption key pair inside this browser**. The private key never leaves
-the browser; only the public key is registered with the backend. Sending happens over SMTP with
-the App Password; the inbox is read over IMAP — both work without any OAuth configuration.
+1. Enable 2-Step Verification on the Gmail account, then create an App Password:
+   https://myaccount.google.com/apppasswords (16 letters, shown once).
+2. In the app: **COMPOSE → Mailbox → + Add mailbox** → fill the SMTP form:
+   the Gmail address as email/username, the 16-letter **App password** (not the Gmail
+   password) as credential, host `smtp.gmail.com`, port `587`, security `starttls`.
+3. Save → **Attach** → **Use this account**.
 
-### Option B — Google OAuth (optional)
+Sending goes over SMTP and the inbox is read over IMAP — no OAuth configuration needed.
 
-1. Open https://console.cloud.google.com and create a project.
-2. **Enable the Gmail API** (*APIs & Services → Library*).
-3. **OAuth consent screen**: user type *External*, scopes `openid`, `email`, `profile`,
-   `https://mail.google.com/`, and add every team Gmail as a **Test user**.
-4. **Credentials → Create credentials → OAuth client ID** (Web application) with redirect URI
-   ```
-   http://127.0.0.1:8000/api/mailbox/oauth/gmail/callback
-   ```
-5. Put the client ID and secret into `backend/.env`:
-   ```
-   SECUREMAILSCOPE_GOOGLE_CLIENT_ID=xxxxxxxx.apps.googleusercontent.com
-   SECUREMAILSCOPE_GOOGLE_CLIENT_SECRET=xxxxxxxx
-   ```
-6. In the app, click **Continue with Google** and sign in.
+**Option B — Google OAuth (optional):** create an OAuth client in Google Cloud with redirect
+URI `http://127.0.0.1:8000/api/mailbox/oauth/gmail/callback`, put the client ID and secret in
+`backend/.env` (see `backend/.env.example`), then use **Continue with Google**.
 
-> Keep the client secret private. It goes only into `backend/.env`, which is git-ignored.
+Connecting a mailbox also creates your **encryption key pair in that browser**. The private
+key never leaves the browser; only the public key is registered.
 
-## 4. Send an encrypted email and read it
+## Sending and reading encrypted mail
 
-**Same browser, two Gmail accounts (simplest demo):** connect both accounts (Option A twice).
-Connect the **recipient's** account first so its key is registered, then connect the sender.
-Compose → recipient address → **Check recipient security** → write the message → **Confirm & Send**.
-Switch to the recipient account → **INBOX** → open the mail marked **E2E encrypted** → it decrypts
-locally.
+**Same browser, two accounts (simplest):** connect the recipient's account first, then the
+sender's. Compose → **Check recipient security** → write the message → **Confirm & Send**.
+Switch to the recipient's account → **INBOX** → open the mail marked **E2E encrypted** → it
+decrypts locally.
 
-**Two laptops:** each instance holds its own keys, so the sender imports the recipient's
-**public key card** (contains no private key — safe to send over WhatsApp):
+**Two machines:** each instance holds its own keys, so the recipient shares their **public key
+card** (INBOX → *Share my public key card* — it contains no private key, so it is safe to send
+over chat) and reads the fingerprint out loud. The sender imports it (INBOX → *Import contact's
+key card*), verifies the fingerprint, then composes and sends as above.
 
-1. Recipient: **INBOX → END-TO-END IDENTITY → Share my public key card**, send the downloaded
-   `.json` to the sender and read the **fingerprint** out loud.
-2. Sender: **INBOX → Import contact's key card**, choose the file, verify the fingerprint.
-3. Compose → send as above. The recipient's browser decrypts it in their **INBOX**.
+## Decrypt inside Gmail (browser extension)
 
-## 5. Decrypt directly inside Gmail (browser extension)
+1. Open `chrome://extensions`, enable **Developer mode**, click **Load unpacked** and select
+   the `extension/` folder of this repo.
+2. Open http://localhost:5173 once in the same browser — the extension copies your keys
+   locally.
+3. Open the encrypted mail in Gmail: a green **"Decrypted locally by SecureMailScope"** panel
+   shows the message and attachments.
 
-Plain Gmail shows only the encrypted block. That is intended: it proves only ciphertext travelled.
+## Configuration
 
-1. Open `chrome://extensions` (or `edge://extensions`) and turn on **Developer mode**.
-2. Click **Load unpacked** and select the **`extension`** folder of this repo.
-3. Open or reload **http://localhost:5173** once, in the same browser where you connected your
-   Gmail. The extension copies your keys locally, and the INBOX card shows
-   **Gmail browser extension: Connected**.
-4. Open the encrypted mail in Gmail. A green **"Decrypted locally by SecureMailScope"** panel shows
-   the message and any attachments.
+Everything works out of the box; all of this is optional (`backend/.env`):
 
-## 6. Deploying for an online round (optional)
+| Variable | Purpose |
+|---|---|
+| `SECUREMAILSCOPE_GOOGLE_CLIENT_ID` / `_SECRET` | Enables Google OAuth sign-in (Option B) |
+| `SECUREMAILSCOPE_AI_API_KEY` (+ optional `_BASE_URL`, `_MODEL`) | Routes the explanation layer through an OpenAI-compatible LLM; without it the deterministic built-in engine is used |
+| `SECUREMAILSCOPE_CORS_ORIGINS` | Extra allowed frontend origins (comma-separated) when the UI is hosted on another domain |
 
-The E2E layer uses the Web Crypto API, which requires a **secure context (HTTPS)** — every free
-hosting platform below provides HTTPS automatically.
+## Security model
 
-**Backend — Render (free web service):**
+- Private keys are generated with the Web Crypto API in the browser and exist only in that
+  browser's storage (and the extension's local storage). They are never transmitted.
+- The backend registry stores **public** keys and fingerprints only — it can never decrypt.
+- Public-key contact cards are safe to share; always verify the fingerprint through a second
+  channel (a call, not the same chat).
+- Mailbox credentials (App Passwords / OAuth tokens) are stored server-side so the backend can
+  send and read mail; they are never displayed in the UI.
+- Never commit or share `backend/.env`, `backend/data/` or `securemailscope-identity-*.json`
+  key backups — they are git-ignored for a reason.
 
-1. Push this repository to GitHub.
-2. Render → **New → Web Service** → select the repo, **Root directory** `backend`.
-3. Build command: `pip install -r requirements.txt`
-   Start command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-4. Environment variable:
-   `SECUREMAILSCOPE_CORS_ORIGINS=https://<your-frontend-domain>` (comma-separated list; the
-   localhost defaults are always included).
-5. Free-tier notes: the service sleeps after inactivity (first request takes ~50 s to wake), and
-   the SQLite databases reset on redeploy — re-add the demo mailboxes after deploying.
+## Extending SecureMailScope
 
-**Frontend — Netlify (drag & drop, no Git needed):**
+The codebase is deliberately small and readable:
 
-1. In `frontend/`, build with the backend URL baked in:
-   ```bat
-   set VITE_API_BASE=https://<your-backend>.onrender.com
-   npm run build
-   ```
-   (PowerShell: `$env:VITE_API_BASE="https://<your-backend>.onrender.com"; npm run build`)
-2. Drag the generated **`dist`** folder onto https://app.netlify.com/drop.
-3. Open the Netlify URL — it talks to the Render backend over HTTPS.
+- `backend/app/api/` — thin FastAPI routers: `domain` (recipient posture), `eml` (forensics),
+  `send`, `mailbox`, `crypto`, `ai`.
+- `backend/app/services/` — one module per capability: `domain_assessment.py` (DNS/MTA-STS/
+  DANE/STARTTLS probing), `email_sender.py` (SMTP/IMAP/Gmail API), plus focused packages for
+  `dns`, `tls`, `smtp`, `crypto`, `risk`, `eml` and `ai`.
+- `frontend/src/` — the dashboard; `services/` holds the API and browser-crypto clients.
+- `extension/` — plain HTML/JS Manifest V3 extension; it receives keys from the dashboard
+  through a local app bridge.
 
-**Security caveat for hosted demos:** the API has no user authentication (out of scope for the
-prototype), and the backend stores mailbox App Passwords so it can send/receive. Keep the deployed
-URL unlisted, use dedicated demo Gmail accounts only, and delete the service after evaluation.
+Ideas that fit naturally: more IMAP/SMTP providers, a PCAP analysis module for passive TLS
+posture mining, MTA-STS policy caching, structured export of forensic reports, or wiring the
+AI layer to a locally hosted model.
 
-## 7. Other features to try
+Contributions are welcome: fork, create a branch, open a pull request. Please never commit
+credentials or key material.
 
-- **Recipient security posture:** on COMPOSE, enter any address and click **Check recipient
-  security**: MX hosts, MTA-STS mode, STARTTLS/TLS and certificate details, risk score, PQC
-  readiness, recommendations and an AI explanation.
-- **EML forensics:** open http://127.0.0.1:8000/docs, then use **POST /api/eml/analyze** to upload
-  any `.eml` file (e.g. `samples/test_email.eml`, or Gmail's *Show original → Download original*).
-  It returns hop reconstruction, SPF/DKIM/DMARC, findings, risk and HNDL.
-- **Key management** (INBOX, END-TO-END IDENTITY card):
-  - **Export/Import key backup**: move your key to another browser or laptop.
-  - **Rotate key**: old keys are kept locally, so old mail stays readable.
-  - **Publish this browser's key**: fixes a key mismatch.
-- **Optional AI provider:** add `SECUREMAILSCOPE_AI_API_KEY` (plus optional `..._BASE_URL` and
-  `..._MODEL`) to `backend/.env`. Without it, the built-in deterministic engine is used.
-
-## 8. Troubleshooting
+## Troubleshooting
 
 | Problem | Fix |
-|---------|-----|
-| **"Failed to fetch"** | The backend is not running. Double-click `start.bat` and refresh the page. |
-| "Authentication failed" when saving/sending | You used the normal Gmail password. Use a **16-letter App Password** (section 3, Option A). |
-| Inbox shows no messages / mentions OAuth | Only if the account was added *before* IMAP support: remove and re-add the mailbox with its App Password. New accounts read the inbox over IMAP automatically. |
-| Encrypted mail shows as raw text / **Key mismatch** | Open it in the **same browser** where that Gmail was connected, or use **Import key backup**. To make *new* mail readable in the current browser, click **Publish this browser's key**. |
-| "This mailbox is authenticated here…" when importing a key card | Contact cards cannot replace the key of a mailbox saved on this instance. Use **Publish this browser's key** instead, or remove the saved mailbox first. |
-| "Access blocked" when signing in with Google | Add that Gmail as a **Test user** (section 3, Option B, step 3). |
-| `redirect_uri_mismatch` | The redirect URI in Google Cloud must be exactly `http://127.0.0.1:8000/api/mailbox/oauth/gmail/callback`. Start the app with `start.bat`. |
-| SMTP/TLS shows "Not observable" and risk is "unknown" | Port 25 is blocked on your network. This is an honest result, not a bug. Use a mobile hotspot to see live SMTP/TLS evidence. |
-| "Port 5173 is in use" | Another copy is running. Close all SecureMailScope windows (or restart), then run `start.bat` again. |
-| Deployed site can't encrypt / crypto errors | The page must be served over **HTTPS** (Web Crypto requirement). Use the Netlify/Render URLs, not a plain-HTTP host. |
+|---|---|
+| "Failed to fetch" | The backend is not running — start it (`start.bat`) and refresh. |
+| "Authentication failed" when saving a mailbox | You used the normal Gmail password; use the 16-letter **App password**. |
+| Encrypted mail shows as raw text / **Key mismatch** | Open it in the same browser where that mailbox was connected, or use **Import key backup**. |
+| SMTP/TLS shows "Not observable" | Your network blocks port 25 — that is an honest result, not a bug. |
+| "Port 5173 is in use" | Another copy is already running; close it and start again. |
 
-## 9. Security notes
+The extended list lives in `CHANGES.md`, the demo/deployment runbook in `RUN-DEMO.md`.
 
-- **Never commit these** (they are in `.gitignore`):
-  - `backend/.env`: the OAuth client secret;
-  - `backend/data/`: mailbox credentials, OAuth tokens and the key registry;
-  - `securemailscope-identity-*.json`: **private key** backups.
-- Private keys live only in the browser (localStorage) and the extension's local storage. They are
-  generated with Web Crypto in a secure context and never transmitted.
-- Keys can only be published for mailboxes authenticated in your SecureMailScope instance.
-  Contact cards hold public keys only; always verify the fingerprint out of band.
-- The backend registry stores **public** keys only (`crypto_keys.db`); mailbox credentials are
-  stored server-side so the backend can send over SMTP and read over IMAP.
+## Acknowledgements
 
-See **`CHANGES.md`** for the full list of fixes, architecture additions and extended test scenarios,
-and **`RUN-DEMO.md`** for a two-minute live demo script.
+Built for **Smart India Hackathon 2026**, Problem Statement **26159** — AI-assisted passive
+network forensics for email cryptographic security — by Team Stellervision.

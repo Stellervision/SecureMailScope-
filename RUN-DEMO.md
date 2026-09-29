@@ -144,3 +144,78 @@ Gmail" moment)
 - Google/Microsoft OAuth sign-in is also implemented; it only needs
   `SECUREMAILSCOPE_GOOGLE_CLIENT_ID` / `_SECRET` in
   `backend/.env` (empty by default, hence the App Password route).
+
+---
+
+## Deploying an online instance (runbook)
+
+Backend on Render (free), frontend on Netlify Drop (free). Do the steps
+in this order. Never upload the project through the GitHub website
+drag-and-drop — that would publish `backend/data/` (App Passwords).
+Always push with git.
+
+### 1. Push the latest code
+
+```bat
+cd C:\Users\SHAYAN\OneDrive\Desktop\mailscope\SecureMailScope-
+git push origin main
+```
+
+### 2. Backend — Render
+
+1. https://render.com → Sign in with GitHub.
+2. **New + → Web Service** → connect the `SecureMailScope-` repository.
+3. Settings:
+   - Name: `securemailscope`
+   - **Root Directory: `backend`**
+   - Build Command: `pip install -r requirements.txt`
+   - Start Command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+   - Instance Type: Free
+4. Click **Deploy Web Service** and wait for **Live** (~5 min).
+5. Copy the service URL — this is the **backend URL**.
+
+### 3. Build the frontend with the backend URL baked in
+
+```bat
+cd C:\Users\SHAYAN\OneDrive\Desktop\mailscope\SecureMailScope-\frontend
+set "VITE_API_BASE=https://<your-backend>.onrender.com" && npm run build
+```
+
+(One command line; PowerShell: `$env:VITE_API_BASE="..."; npm run build`.)
+This creates `frontend\dist`.
+
+### 4. Frontend — Netlify Drop
+
+1. Sign in at https://app.netlify.com **first** (an anonymous drop is
+   deleted after one hour), then open https://app.netlify.com/drop.
+2. Drag the `frontend\dist` folder onto the page.
+3. Copy the site URL — this is the **frontend URL**.
+
+### 5. Allow the frontend origin on the backend
+
+Render → your service → **Environment** → add:
+
+- Key: `SECUREMAILSCOPE_CORS_ORIGINS`
+- Value: the frontend URL from step 4
+
+Save — Render redeploys automatically (~3 min).
+
+### 6. Verify the deployed instance
+
+1. Open the frontend URL. Web Crypto requires HTTPS — Netlify provides it.
+2. Re-add the demo mailboxes (App Passwords): the deployed database
+   starts empty.
+3. Send one encrypted message and decrypt it in the INBOX.
+
+### Hosted-demo notes
+
+- Free tier sleeps after inactivity: the first request after a pause
+  takes ~50 s to wake. Tell judges to wait.
+- Every redeploy resets the SQLite databases — re-add mailboxes.
+- "Continue with Google" on the deployed site needs the deployed
+  callback URL added in Google Cloud; the App Password route needs
+  nothing.
+- The API has no user authentication (prototype scope): keep the URLs
+  unlisted, use dedicated demo Gmail accounts, and delete both services
+  after evaluation (Render: Settings → Delete; Netlify: Site
+  configuration → Delete site).
