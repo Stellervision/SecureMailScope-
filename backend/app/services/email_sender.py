@@ -496,13 +496,19 @@ def _database_account(
     }:
         auth_type = "smtp_password"
 
+    sender_email = _clean(row["sender_email"])
+    username = _clean(row["username"])
+
+    # Gmail-style providers require the full email address as the
+    # login name; fall back to the sender email when only a bare
+    # mailbox name was saved.
+    if username and "@" not in username and "@" in sender_email:
+        username = sender_email
+
     return {
         "account_id": row["account_id"],
-        "sender_email": row["sender_email"],
-        "username": (
-            row["username"]
-            or row["sender_email"]
-        ),
+        "sender_email": sender_email,
+        "username": username or sender_email,
         "password": row["password"] or "",
         "smtp_host": row["smtp_host"],
         "smtp_port": smtp_port,
